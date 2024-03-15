@@ -12,11 +12,11 @@ but also for a demo project maybe using some common hello world including DB cal
 ## Frameworks
 Top PHP frameworks
 
-- laravel/laravel
+- laravel/framework
 - symfony/symfony
 - yiisoft/yii2
 - cakephp/cakephp
-- codeigniter4/codeigniter
+- codeigniter4/CodeIgniter4
 
 ### Results
 See `reports/` files.
