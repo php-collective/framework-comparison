@@ -41,5 +41,5 @@ if ($composer_status !== 0) {
     exit(1);
 }
 
-exec("vendor/bin/phpstan analyze --level=7 --no-progress --error-format=prettyJson > ../.$reports_dir/phpstan_$repo_name.json", $phpstan_output, $phpstan_status);
+exec("vendor/bin/phpstan analyze --level=8 --no-progress --error-format=prettyJson > ../.$reports_dir/phpstan_$repo_name.json", $phpstan_output, $phpstan_status);
 
