@@ -1,7 +1,7 @@
 # framework-comparison
 Compare some metrics of popular PHP frameworks
 
-- phpstan up to level 7
+- phpstan up to level 8/9
 - psalm
 
 each for the framework core
