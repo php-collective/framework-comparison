@@ -6,9 +6,13 @@
 
 $baseDir = dirname(__DIR__);
 $reposDir = $baseDir . '/repos';
-$reportsDir = $baseDir . '/reports';
+$dataDir = $baseDir . '/reports/data';
 $laminasDir = "$reposDir/laminas";
-$reportPath = "$reportsDir/phpstan_laminas.json";
+$reportPath = "$dataDir/phpstan_laminas.json";
+
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0777, true);
+}
 
 // Core Laminas packages for a fair comparison
 $packages = [

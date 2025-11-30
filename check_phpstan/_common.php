@@ -11,18 +11,18 @@
 
 $baseDir = dirname(__DIR__);
 $reposDir = $baseDir . '/repos';
-$reportsDir = $baseDir . '/reports';
+$dataDir = $baseDir . '/reports/data';
 
 if (!is_dir($reposDir)) {
     mkdir($reposDir, 0777, true);
 }
 
-if (!is_dir($reportsDir)) {
-    mkdir($reportsDir, 0777, true);
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0777, true);
 }
 
 $repoPath = "$reposDir/$repoName";
-$reportPath = "$reportsDir/phpstan_$repoName.json";
+$reportPath = "$dataDir/phpstan_$repoName.json";
 
 echo "=== PHPStan: $framework ===\n";
 

@@ -8,6 +8,9 @@
 echo "Generating summary report...\n";
 
 $reportsDir = __DIR__ . '/reports';
+$dataDir = __DIR__ . '/reports/data';
+$reposDir = __DIR__ . '/repos';
+
 // Alphabetical order
 $frameworks = ['cakephp', 'codeigniter', 'laminas', 'laravel', 'symfony', 'yii2'];
 $displayNames = [
@@ -18,6 +21,72 @@ $displayNames = [
     'symfony' => 'Symfony',
     'yii2' => 'Yii2',
 ];
+
+/**
+ * Format a value for display: null => '-', otherwise the value.
+ */
+function fmt($value, bool $format = false, int $decimals = 0): string
+{
+    if ($value === null) {
+        return '-';
+    }
+    if ($format) {
+        return $decimals > 0 ? number_format($value, $decimals) : number_format($value);
+    }
+    return (string) $value;
+}
+
+/**
+ * Detect framework version from source files.
+ */
+function getFrameworkVersion(string $reposDir, string $fw): string
+{
+    $fwDir = "$reposDir/$fw";
+
+    return match ($fw) {
+        'cakephp' => (function () use ($fwDir) {
+            $lines = file("$fwDir/VERSION.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            return trim(end($lines)) ?: 'unknown';
+        })(),
+        'codeigniter' => (function () use ($fwDir) {
+            $content = file_get_contents("$fwDir/system/CodeIgniter.php");
+            if (preg_match("/CI_VERSION\s*=\s*'([^']+)'/", $content, $m)) {
+                return $m[1];
+            }
+            return 'unknown';
+        })(),
+        'laravel' => (function () use ($fwDir) {
+            $content = file_get_contents("$fwDir/src/Illuminate/Foundation/Application.php");
+            if (preg_match("/VERSION\s*=\s*'([^']+)'/", $content, $m)) {
+                return $m[1];
+            }
+            return 'unknown';
+        })(),
+        'symfony' => (function () use ($fwDir) {
+            $content = file_get_contents("$fwDir/src/Symfony/Component/HttpKernel/Kernel.php");
+            if (preg_match("/VERSION\s*=\s*'([^']+)'/", $content, $m)) {
+                return $m[1];
+            }
+            return 'unknown';
+        })(),
+        'yii2' => (function () use ($fwDir) {
+            $content = file_get_contents("$fwDir/framework/BaseYii.php");
+            if (preg_match("/return\s*'([^']+)'/", $content, $m)) {
+                return $m[1];
+            }
+            return 'unknown';
+        })(),
+        'laminas' => (function () use ($fwDir) {
+            // Get version from laminas-mvc branch name
+            $branch = trim(shell_exec("git -C $fwDir/laminas-mvc rev-parse --abbrev-ref HEAD 2>/dev/null") ?: '');
+            if (preg_match('/^(\d+\.\d+)/', $branch, $m)) {
+                return $m[1] . '.x';
+            }
+            return 'unknown';
+        })(),
+        default => 'unknown',
+    };
+}
 
 $data = [];
 foreach ($frameworks as $fw) {
@@ -30,27 +99,27 @@ foreach ($frameworks as $fw) {
     ];
 
     // PHPStan
-    $phpstanFile = "$reportsDir/phpstan_$fw.json";
+    $phpstanFile = "$dataDir/phpstan_$fw.json";
     if (file_exists($phpstanFile)) {
         $json = json_decode(file_get_contents($phpstanFile), true);
         $data[$fw]['phpstan'] = $json['totals']['file_errors'] ?? null;
     }
 
     // Psalm
-    $psalmFile = "$reportsDir/psalm_$fw.json";
+    $psalmFile = "$dataDir/psalm_$fw.json";
     if (file_exists($psalmFile)) {
         $json = json_decode(file_get_contents($psalmFile), true);
         $data[$fw]['psalm'] = is_array($json) ? count($json) : null;
     }
 
     // phploc
-    $phplocFile = "$reportsDir/phploc_$fw.json";
+    $phplocFile = "$dataDir/phploc_$fw.json";
     if (file_exists($phplocFile)) {
         $data[$fw]['phploc'] = json_decode(file_get_contents($phplocFile), true);
     }
 
     // Cognitive
-    $cognitiveFile = "$reportsDir/cognitive_$fw.json";
+    $cognitiveFile = "$dataDir/cognitive_$fw.json";
     if (file_exists($cognitiveFile)) {
         $json = json_decode(file_get_contents($cognitiveFile), true);
         if (is_array($json)) {
@@ -80,7 +149,7 @@ foreach ($frameworks as $fw) {
     }
 
     // Silenced issues
-    $silencedFile = "$reportsDir/silenced_$fw.json";
+    $silencedFile = "$dataDir/silenced_$fw.json";
     if (file_exists($silencedFile)) {
         $data[$fw]['silenced'] = json_decode(file_get_contents($silencedFile), true);
     }
@@ -112,11 +181,11 @@ foreach ($frameworks as $fw) {
         $md .= sprintf(
             "| %s | %s | %s | %s | %s | %s |\n",
             $displayNames[$fw],
-            number_format($loc['loc'] ?? 0),
-            number_format($loc['classes'] ?? 0),
-            number_format($loc['methods'] ?? 0),
-            round($loc['methodLlocAvg'] ?? 0, 1),
-            round($loc['ccnByLloc'] ?? 0, 2)
+            fmt($loc['loc'] ?? null, true),
+            fmt($loc['classes'] ?? null, true),
+            fmt($loc['methods'] ?? null, true),
+            fmt(isset($loc['methodLlocAvg']) ? round($loc['methodLlocAvg'], 1) : null),
+            fmt(isset($loc['ccnByLloc']) ? round($loc['ccnByLloc'], 2) : null)
         );
     } else {
         $md .= "| " . $displayNames[$fw] . " | - | - | - | - | - |\n";
@@ -134,9 +203,9 @@ foreach ($frameworks as $fw) {
         $md .= sprintf(
             "| %s | %s | %s | %s |\n",
             $displayNames[$fw],
-            number_format($cog['methods']),
-            $cog['avg'],
-            $cog['max']
+            fmt($cog['methods'] ?? null, true),
+            fmt($cog['avg'] ?? null),
+            fmt($cog['max'] ?? null)
         );
     } else {
         $md .= "| " . $displayNames[$fw] . " | - | - | - |\n";
@@ -152,14 +221,14 @@ foreach ($frameworks as $fw) {
     $s = $data[$fw]['silenced'];
     if ($s) {
         $md .= sprintf(
-            "| %s | %d | %d | %d | %d | %d | %d |\n",
+            "| %s | %s | %s | %s | %s | %s | %s |\n",
             $displayNames[$fw],
-            $s['phpstan_ignore'] ?? 0,
-            $s['psalm_suppress'] ?? 0,
-            $s['phpcs_ignore'] ?? 0,
-            $s['coverage_ignore'] ?? 0,
-            $s['phpstan_baseline'] ?? 0,
-            $s['psalm_baseline'] ?? 0
+            fmt($s['phpstan_ignore'] ?? null),
+            fmt($s['psalm_suppress'] ?? null),
+            fmt($s['phpcs_ignore'] ?? null),
+            fmt($s['coverage_ignore'] ?? null),
+            fmt($s['phpstan_baseline'] ?? null),
+            fmt($s['psalm_baseline'] ?? null)
         );
     } else {
         $md .= "| " . $displayNames[$fw] . " | - | - | - | - | - | - |\n";
@@ -167,21 +236,37 @@ foreach ($frameworks as $fw) {
 }
 
 $md .= "\n## Frameworks Analyzed\n\n";
-$md .= "| Framework | First Release | GitHub |\n";
-$md .= "|-----------|---------------|--------|\n";
-$md .= "| CakePHP | 2005 | [cakephp/cakephp](https://github.com/cakephp/cakephp) |\n";
-$md .= "| CodeIgniter | 2006 | [codeigniter4/CodeIgniter4](https://github.com/codeigniter4/CodeIgniter4) |\n";
-$md .= "| Laminas | 2006 | [laminas/laminas-mvc](https://github.com/laminas/laminas-mvc) |\n";
-$md .= "| Laravel | 2011 | [laravel/framework](https://github.com/laravel/framework) |\n";
-$md .= "| Symfony | 2005 | [symfony/symfony](https://github.com/symfony/symfony) |\n";
-$md .= "| Yii2 | 2008 | [yiisoft/yii2](https://github.com/yiisoft/yii2) |\n";
+$md .= "| Framework | Version | First Release | GitHub |\n";
+$md .= "|-----------|---------|---------------|--------|\n";
+
+$frameworkMeta = [
+    'cakephp' => ['year' => 2005, 'repo' => 'cakephp/cakephp'],
+    'codeigniter' => ['year' => 2006, 'repo' => 'codeigniter4/CodeIgniter4'],
+    'laminas' => ['year' => 2006, 'repo' => 'laminas/laminas-mvc'],
+    'laravel' => ['year' => 2011, 'repo' => 'laravel/framework'],
+    'symfony' => ['year' => 2005, 'repo' => 'symfony/symfony'],
+    'yii2' => ['year' => 2008, 'repo' => 'yiisoft/yii2'],
+];
+
+foreach ($frameworks as $fw) {
+    $version = getFrameworkVersion($reposDir, $fw);
+    $meta = $frameworkMeta[$fw];
+    $md .= sprintf(
+        "| %s | %s | %d | [%s](https://github.com/%s) |\n",
+        $displayNames[$fw],
+        $version,
+        $meta['year'],
+        $meta['repo'],
+        $meta['repo']
+    );
+}
 
 $md .= "\n## Notes\n\n";
 $md .= "- PHPStan and Psalm run at their strictest levels\n";
 $md .= "- Silenced issues = errors hidden via inline annotations or baseline files\n";
 $md .= "- Lower error counts indicate better type safety and static analysis compliance\n";
 $md .= "- Laminas: analyzed 10 core packages (mvc, db, view, form, validator, router, servicemanager, eventmanager, http, session)\n";
-$md .= "- Symfony Psalm: fails due to component isolation lacking autoloading\n";
+$md .= "- Symfony Psalm: analyzed per-component using root autoloader (1 component failed)\n";
 $md .= "- LOC = Lines of Code, LLOC = Logical Lines of Code\n";
 $md .= "- Complexity/LLOC = Cyclomatic complexity per logical line of code\n";
 

@@ -6,9 +6,13 @@
 
 $baseDir = dirname(__DIR__);
 $reposDir = $baseDir . '/repos';
-$reportsDir = $baseDir . '/reports';
+$dataDir = $baseDir . '/reports/data';
 $laminasDir = "$reposDir/laminas";
-$reportPath = "$reportsDir/cognitive_laminas.json";
+$reportPath = "$dataDir/cognitive_laminas.json";
+
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0777, true);
+}
 
 $packages = [
     'laminas-mvc', 'laminas-db', 'laminas-view', 'laminas-form',

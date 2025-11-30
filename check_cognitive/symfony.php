@@ -6,9 +6,13 @@
 
 $baseDir = dirname(__DIR__);
 $reposDir = $baseDir . '/repos';
-$reportsDir = $baseDir . '/reports';
+$dataDir = $baseDir . '/reports/data';
 $repoPath = "$reposDir/symfony";
-$reportPath = "$reportsDir/cognitive_symfony.json";
+$reportPath = "$dataDir/cognitive_symfony.json";
+
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0777, true);
+}
 
 echo "=== Cognitive Analysis: symfony/symfony (by component) ===\n";
 

@@ -4,10 +4,10 @@ echo str_repeat('=', 60) . "\n";
 echo "       PHP Framework Comparison - Full Analysis\n";
 echo str_repeat('=', 60) . "\n\n";
 
-$tools = ['phpstan', 'psalm', 'phploc', 'cognitive', 'silenced'];
+$checks = ['phpstan', 'psalm', 'phploc', 'cognitive', 'silenced'];
 
-foreach ($tools as $tool) {
-    passthru("php " . __DIR__ . "/$tool/run_all.php");
+foreach ($checks as $check) {
+    passthru("php " . __DIR__ . "/check_$check/run_all.php");
     echo "\n\n";
 }
 

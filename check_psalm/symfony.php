@@ -1,14 +1,18 @@
 <?php
 
 /**
- * Symfony Psalm analysis - iterates over components to avoid crashes.
+ * Symfony Psalm analysis - uses root autoloader for each component.
  */
 
 $baseDir = dirname(__DIR__);
 $reposDir = $baseDir . '/repos';
-$reportsDir = $baseDir . '/reports';
+$dataDir = $baseDir . '/reports/data';
 $repoPath = "$reposDir/symfony";
-$reportPath = "$reportsDir/psalm_symfony.json";
+$reportPath = "$dataDir/psalm_symfony.json";
+
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0777, true);
+}
 
 echo "=== Psalm: symfony/symfony (by component) ===\n";
 
@@ -24,7 +28,7 @@ if (!file_exists($psalmPhar)) {
     exec("curl -sL https://github.com/vimeo/psalm/releases/latest/download/psalm.phar -o $psalmPhar 2>&1");
     chmod($psalmPhar, 0755);
 }
-$psalmBin = "php $psalmPhar";
+$psalmBin = "php -d memory_limit=2G $psalmPhar";
 
 // Find all components
 $componentDirs = glob("$repoPath/src/Symfony/Component/*", GLOB_ONLYDIR);
@@ -39,30 +43,41 @@ $failed = 0;
 
 echo "Found " . count($allDirs) . " components/bundles/bridges to analyze...\n";
 
+// Temp config file in the repo root
+$tempConfigFile = "$repoPath/_psalm_component.xml";
+
 foreach ($allDirs as $dir) {
     $name = basename($dir);
     $parent = basename(dirname($dir));
+    $relativePath = "src/Symfony/$parent/$name";
 
-    // Create temp psalm.xml for this component
+    // Create psalm.xml in repo root that targets this component but uses root autoloader
+    // Only add ignoreFiles if Tests directory exists
+    $testsDir = "$repoPath/$relativePath/Tests";
+    $ignoreFiles = is_dir($testsDir)
+        ? "<ignoreFiles><directory name=\"$relativePath/Tests\" /></ignoreFiles>"
+        : '';
+
     $psalmConfig = <<<XML
 <?xml version="1.0"?>
-<psalm errorLevel="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://getpsalm.org/schema/config">
+<psalm
+    errorLevel="1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    autoloader="vendor/autoload.php"
+>
     <projectFiles>
-        <directory name="." />
-        <ignoreFiles><directory name="Tests" /></ignoreFiles>
+        <directory name="$relativePath" />
+        $ignoreFiles
     </projectFiles>
 </psalm>
 XML;
 
-    $configFile = "$dir/psalm.xml";
-    $hadConfig = file_exists($configFile);
-    if (!$hadConfig) {
-        file_put_contents($configFile, $psalmConfig);
-    }
+    file_put_contents($tempConfigFile, $psalmConfig);
 
-    // Run psalm
+    // Run psalm from repo root with the temp config
     $output = [];
-    exec("cd " . escapeshellarg($dir) . " && $psalmBin --output-format=json --no-progress 2>/dev/null", $output);
+    exec("cd " . escapeshellarg($repoPath) . " && $psalmBin --config=_psalm_component.xml --output-format=json --no-progress 2>/dev/null", $output);
     $json = json_decode(implode("\n", $output), true);
 
     if (is_array($json)) {
@@ -70,14 +85,18 @@ XML;
         $totalIssues += $count;
         $allIssues = array_merge($allIssues, $json);
         $processed++;
+        if ($count > 0) {
+            echo "  $parent/$name: $count issues\n";
+        }
     } else {
         $failed++;
+        echo "  $parent/$name: failed\n";
     }
+}
 
-    // Cleanup temp config
-    if (!$hadConfig && file_exists($configFile)) {
-        unlink($configFile);
-    }
+// Cleanup temp config
+if (file_exists($tempConfigFile)) {
+    unlink($tempConfigFile);
 }
 
 // Save combined report

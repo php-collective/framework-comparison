@@ -27,12 +27,12 @@ Compare static analysis and code quality metrics of popular PHP frameworks.
 # Run all analyses
 php run_all.php
 
-# Or run individual tools
-php phpstan/run_all.php
-php psalm/run_all.php
-php phploc/run_all.php
-php cognitive/run_all.php
-php silenced/run_all.php
+# Or run individual checks
+php check_phpstan/run_all.php
+php check_psalm/run_all.php
+php check_phploc/run_all.php
+php check_cognitive/run_all.php
+php check_silenced/run_all.php
 
 # Regenerate report from existing JSON
 php generate_report.php
