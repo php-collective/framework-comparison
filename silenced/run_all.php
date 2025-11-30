@@ -12,7 +12,7 @@ $reportsDir = __DIR__ . '/../reports';
 $frameworks = [
     'cakephp' => ['src' => 'src'],
     'codeigniter' => ['src' => 'system'],
-    'laminas' => ['src' => 'src'],
+    'laminas' => ['src' => '.', 'multi' => true],  // Multi-package
     'laravel' => ['src' => 'src'],
     'symfony' => ['src' => 'src'],
     'yii2' => ['src' => 'framework'],

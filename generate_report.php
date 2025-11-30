@@ -180,7 +180,8 @@ $md .= "\n## Notes\n\n";
 $md .= "- PHPStan and Psalm run at their strictest levels\n";
 $md .= "- Silenced issues = errors hidden via inline annotations or baseline files\n";
 $md .= "- Lower error counts indicate better type safety and static analysis compliance\n";
-$md .= "- Symfony Psalm: crashes due to codebase complexity (marked as `-`)\n";
+$md .= "- Laminas: analyzed 10 core packages (mvc, db, view, form, validator, router, servicemanager, eventmanager, http, session)\n";
+$md .= "- Symfony Psalm: fails due to component isolation lacking autoloading\n";
 $md .= "- LOC = Lines of Code, LLOC = Logical Lines of Code\n";
 $md .= "- Complexity/LLOC = Cyclomatic complexity per logical line of code\n";
 

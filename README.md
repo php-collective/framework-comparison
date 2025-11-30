@@ -1,26 +1,49 @@
-# framework-comparison
-Compare some metrics of popular PHP frameworks
+# PHP Framework Comparison
 
-- phpstan up to level 8/9
-- psalm
+Compare static analysis and code quality metrics of popular PHP frameworks.
 
-each for the framework core
+## Frameworks Analyzed
 
-but also for a demo project maybe using some common hello world including DB call and processing?
+- [cakephp/cakephp](https://github.com/cakephp/cakephp)
+- [codeigniter4/CodeIgniter4](https://github.com/codeigniter4/CodeIgniter4)
+- [laminas/laminas-mvc](https://github.com/laminas/laminas-mvc)
+- [laravel/framework](https://github.com/laravel/framework)
+- [symfony/symfony](https://github.com/symfony/symfony)
+- [yiisoft/yii2](https://github.com/yiisoft/yii2)
 
+## Metrics Collected
 
-## Frameworks
-Top PHP frameworks
+| Tool | Description |
+|------|-------------|
+| PHPStan (Level 8) | Static analysis error count |
+| Psalm | Static analysis error count |
+| phploc | Lines of code, classes, methods, complexity |
+| Cognitive Complexity | Method complexity analysis |
+| Silenced Issues | Inline suppressions and baseline entries |
 
-- laravel/framework
-- symfony/symfony
-- yiisoft/yii2
-- cakephp/cakephp
-- codeigniter4/CodeIgniter4
+## Usage
 
-### Results
-See `reports/` files.
+```bash
+# Run all analyses
+php run_all.php
 
+# Or run individual tools
+php phpstan/run_all.php
+php psalm/run_all.php
+php phploc/run_all.php
+php cognitive/run_all.php
+php silenced/run_all.php
 
-### TODOs
+# Regenerate report from existing JSON
+php generate_report.php
+```
+
+## Results
+
+See [reports/README.md](reports/README.md) for the latest comparison table.
+
+Note: The results are not interpreted here, only displayed as raw data so far.
+
+## TODOs
+
 - visible results as table or graph

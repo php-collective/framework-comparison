@@ -1,6 +1,6 @@
 # PHP Framework Comparison Results
 
-Generated: 2025-11-30 12:39:33
+Generated: 2025-11-30 12:57:41
 
 ## Static Analysis Errors
 
@@ -8,9 +8,9 @@ Generated: 2025-11-30 12:39:33
 |-----------|-------------------|-------|
 | CakePHP | 16 | 3095 |
 | CodeIgniter | 2354 | 104 |
-| Laminas | 309 | 185 |
+| Laminas | 3135 | 6188 |
 | Laravel | 11782 | 8287 |
-| Symfony | 2 | - |
+| Symfony | 2 | 0 |
 | Yii2 | 4494 | 3229 |
 
 ## Code Metrics (phploc)
@@ -19,7 +19,7 @@ Generated: 2025-11-30 12:39:33
 |-----------|-----|---------|---------|-------------------|----------------|
 | CakePHP | 148,259 | 525 | 4,981 | 4.3 | 0.45 |
 | CodeIgniter | 117,550 | 459 | 4,049 | 4.5 | 0.48 |
-| Laminas | 7,207 | 77 | 274 | 4.2 | 0.3 |
+| Laminas | 101,380 | 745 | 4,276 | 3.6 | 0.39 |
 | Laravel | 242,353 | 1,077 | 12,634 | 2.1 | 0.38 |
 | Symfony | 1,871,683 | 7,898 | 45,798 | 4 | 0.23 |
 | Yii2 | 116,720 | 402 | 3,477 | 4.5 | 0.48 |
@@ -30,9 +30,9 @@ Generated: 2025-11-30 12:39:33
 |-----------|---------|----------------|----------------|
 | CakePHP | 4,640 | 0.33 | 8.385 |
 | CodeIgniter | 3,683 | 0.38 | 12.471 |
-| Laminas | 266 | 0.21 | 5.053 |
+| Laminas | 3,948 | 0.24 | 11.273 |
 | Laravel | 11,902 | 0.08 | 7.233 |
-| Symfony | - | - | - |
+| Symfony | 42,007 | 0.19 | 14.617 |
 | Yii2 | 3,313 | 0.48 | 8.225 |
 
 ## Silenced Issues (Inline Annotations & Baselines)
@@ -41,7 +41,7 @@ Generated: 2025-11-30 12:39:33
 |-----------|-----------------|-----------------|--------------|---------------------|------------------|----------------|
 | CakePHP | 17 | 0 | 67 | 0 | 124 | 0 |
 | CodeIgniter | 12 | 30 | 0 | 224 | 0 | 89 |
-| Laminas | 0 | 0 | 34 | 0 | 0 | 0 |
+| Laminas | 475 | 4081 | 2936 | 2758 | 0 | 0 |
 | Laravel | 9 | 0 | 0 | 0 | 0 | 0 |
 | Symfony | 0 | 0 | 0 | 0 | 0 | 0 |
 | Yii2 | 0 | 0 | 18 | 0 | 91 | 0 |
@@ -62,6 +62,7 @@ Generated: 2025-11-30 12:39:33
 - PHPStan and Psalm run at their strictest levels
 - Silenced issues = errors hidden via inline annotations or baseline files
 - Lower error counts indicate better type safety and static analysis compliance
-- Symfony Psalm: crashes due to codebase complexity (marked as `-`)
+- Laminas: analyzed 10 core packages (mvc, db, view, form, validator, router, servicemanager, eventmanager, http, session)
+- Symfony Psalm: fails due to component isolation lacking autoloading
 - LOC = Lines of Code, LLOC = Logical Lines of Code
 - Complexity/LLOC = Cyclomatic complexity per logical line of code
