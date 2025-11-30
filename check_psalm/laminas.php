@@ -29,6 +29,7 @@ if (!file_exists($psalmPhar)) {
 $psalmBin = "php $psalmPhar";
 
 $allIssues = [];
+$totalTime = 0;
 
 foreach ($packages as $name) {
     $pkgDir = "$laminasDir/$name";
@@ -44,13 +45,15 @@ foreach ($packages as $name) {
     // Create psalm config if needed
     $configFile = "$pkgDir/psalm.xml";
     if (!file_exists($configFile)) {
-        $config = '<?xml version="1.0"?><psalm errorLevel="1" xmlns="https://getpsalm.org/schema/config"><projectFiles><directory name="src" /></projectFiles></psalm>';
-        file_put_contents($configFile, $config);
+        $psalmConfig = '<?xml version="1.0"?><psalm errorLevel="1" xmlns="https://getpsalm.org/schema/config"><projectFiles><directory name="src" /></projectFiles></psalm>';
+        file_put_contents($configFile, $psalmConfig);
     }
 
-    // Run psalm
+    // Run psalm (timed)
     $output = [];
+    $pkgStart = microtime(true);
     exec("cd " . escapeshellarg($pkgDir) . " && $psalmBin --output-format=json --no-progress 2>/dev/null", $output);
+    $totalTime += microtime(true) - $pkgStart;
     $json = json_decode(implode("\n", $output), true);
 
     if (is_array($json)) {
@@ -61,6 +64,12 @@ foreach ($packages as $name) {
 }
 
 file_put_contents($reportPath, json_encode($allIssues, JSON_PRETTY_PRINT));
+
+// Save timing (analysis only)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing['laminas']['psalm'] = round($totalTime, 1);
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 echo "\nCompleted: " . count($allIssues) . " total issues found.\n";
 echo "Report saved to: $reportPath\n";

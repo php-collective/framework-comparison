@@ -63,10 +63,19 @@ if (!file_exists($ccaBin)) {
 
 $analyzePath = "$repoPath/$srcDir";
 
-// Run cognitive analysis
+// Run cognitive analysis (timed)
 echo "Running cognitive analysis on $srcDir...\n";
 $ccaCommand = "$ccaBin analyse $analyzePath --report-type=json --report-file=$reportPath 2>&1";
+
+$startTime = microtime(true);
 exec($ccaCommand, $ccaOutput, $ccaStatus);
+$elapsed = round(microtime(true) - $startTime, 1);
+
+// Save timing (analysis only, not setup)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing[$repoName]['cognitive'] = $elapsed;
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 // Read and display summary
 if (file_exists($reportPath)) {

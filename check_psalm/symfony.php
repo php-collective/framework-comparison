@@ -40,6 +40,7 @@ $totalIssues = 0;
 $allIssues = [];
 $processed = 0;
 $failed = 0;
+$totalTime = 0;
 
 echo "Found " . count($allDirs) . " components/bundles/bridges to analyze...\n";
 
@@ -75,9 +76,11 @@ XML;
 
     file_put_contents($tempConfigFile, $psalmConfig);
 
-    // Run psalm from repo root with the temp config
+    // Run psalm from repo root with the temp config (timed)
     $output = [];
+    $compStart = microtime(true);
     exec("cd " . escapeshellarg($repoPath) . " && $psalmBin --config=_psalm_component.xml --output-format=json --no-progress 2>/dev/null", $output);
+    $totalTime += microtime(true) - $compStart;
     $json = json_decode(implode("\n", $output), true);
 
     if (is_array($json)) {
@@ -101,6 +104,12 @@ if (file_exists($tempConfigFile)) {
 
 // Save combined report
 file_put_contents($reportPath, json_encode($allIssues, JSON_PRETTY_PRINT));
+
+// Save timing (analysis only)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing['symfony']['psalm'] = round($totalTime, 1);
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 echo "\nCompleted: $totalIssues issues found.\n";
 echo "Components processed: $processed, failed: $failed\n";

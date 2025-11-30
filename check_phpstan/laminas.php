@@ -29,6 +29,7 @@ if (!is_dir($laminasDir)) {
 
 $totalErrors = 0;
 $allFiles = [];
+$totalTime = 0;
 
 foreach ($packages as $name) {
     $pkgConfig = $laminasConfig[$name];
@@ -64,9 +65,11 @@ foreach ($packages as $name) {
         exec('composer require --dev phpstan/phpstan --no-interaction --ignore-platform-reqs 2>&1');
     }
 
-    // Run PHPStan
+    // Run PHPStan (timed)
     $output = [];
+    $pkgStart = microtime(true);
     exec('vendor/bin/phpstan analyze src --level=8 --no-progress --error-format=prettyJson 2>/dev/null', $output);
+    $totalTime += microtime(true) - $pkgStart;
     $json = json_decode(implode("\n", $output), true);
 
     if (isset($json['totals']['file_errors'])) {
@@ -93,6 +96,12 @@ $combined = [
     'errors' => [],
 ];
 file_put_contents($reportPath, json_encode($combined, JSON_PRETTY_PRINT));
+
+// Save timing (analysis only)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing['laminas']['phpstan'] = round($totalTime, 1);
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 echo "\nCompleted: $totalErrors total errors found.\n";
 echo "Report saved to: $reportPath\n";

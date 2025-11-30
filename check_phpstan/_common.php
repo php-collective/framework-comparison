@@ -72,13 +72,22 @@ if (!file_exists($phpstanBin)) {
     exec('composer require --dev phpstan/phpstan --no-interaction --ignore-platform-reqs 2>&1');
 }
 
-// Run PHPStan
+// Run PHPStan (timed)
 echo "Running PHPStan level 8...\n";
 $phpstanCommand = "$phpstanBin analyze $srcDir --level=8 --no-progress --error-format=prettyJson 2>/dev/null";
+
+$startTime = microtime(true);
 exec($phpstanCommand, $phpstanOutput);
+$elapsed = round(microtime(true) - $startTime, 1);
 
 $jsonOutput = implode("\n", $phpstanOutput);
 file_put_contents($reportPath, $jsonOutput);
+
+// Save timing (analysis only, not setup)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing[$repoName]['phpstan'] = $elapsed;
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 $jsonData = json_decode($jsonOutput, true);
 $fileErrors = $jsonData['totals']['file_errors'] ?? 'unknown';

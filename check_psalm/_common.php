@@ -87,13 +87,22 @@ if (!file_exists('psalm.xml') && !file_exists('psalm.xml.dist')) {
     exec("$psalmBin --init $srcDir 2>&1");
 }
 
-// Run Psalm
+// Run Psalm (timed)
 echo "Running Psalm...\n";
 $psalmCommand = "$psalmBin --output-format=json --no-progress 2>/dev/null";
+
+$startTime = microtime(true);
 exec($psalmCommand, $psalmOutput, $psalmStatus);
+$elapsed = round(microtime(true) - $startTime, 1);
 
 $jsonOutput = implode("\n", $psalmOutput);
 file_put_contents($reportPath, $jsonOutput);
+
+// Save timing (analysis only, not setup)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing[$repoName]['psalm'] = $elapsed;
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 $jsonData = json_decode($jsonOutput, true);
 $errorCount = is_array($jsonData) ? count($jsonData) : 'unknown';

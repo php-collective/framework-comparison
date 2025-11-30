@@ -11,12 +11,12 @@
 return [
     'cakephp' => [
         'repo' => 'cakephp/cakephp',
-        'branch' => null, // default branch (master) is stable
+        'branch' => '5.x', // stable branch
         'srcDir' => 'src',
     ],
     'codeigniter' => [
         'repo' => 'codeigniter4/CodeIgniter4',
-        'branch' => null, // default branch (develop) - consider 4.x for stable
+        'branch' => 'v4.6.3', // latest stable tag (develop is default)
         'srcDir' => 'system',
     ],
     'laminas' => [
@@ -38,12 +38,12 @@ return [
     ],
     'laravel' => [
         'repo' => 'laravel/framework',
-        'branch' => null, // default branch (master) is dev - consider 11.x for stable
+        'branch' => '12.x', // stable branch
         'srcDir' => 'src',
     ],
     'symfony' => [
         'repo' => 'symfony/symfony',
-        'branch' => null, // default branch is dev - consider 7.2 for stable
+        'branch' => '8.0', // stable branch
         'srcDir' => 'src',
     ],
     'yii2' => [

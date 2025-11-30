@@ -37,6 +37,7 @@ $allDirs = array_merge($componentDirs, $bundleDirs, $bridgeDirs);
 $combinedResults = [];
 $processed = 0;
 $failed = 0;
+$totalTime = 0;
 
 echo "Found " . count($allDirs) . " components/bundles/bridges to analyze...\n";
 
@@ -46,9 +47,11 @@ foreach ($allDirs as $dir) {
     // Skip Tests directories inside component
     $tempReport = "/tmp/cognitive_symfony_$name.json";
 
-    // Run cognitive analysis
+    // Run cognitive analysis (timed)
     $output = [];
+    $compStart = microtime(true);
     exec("$ccaBin analyse " . escapeshellarg($dir) . " --report-type=json --report-file=$tempReport 2>/dev/null", $output, $status);
+    $totalTime += microtime(true) - $compStart;
 
     if (file_exists($tempReport)) {
         $json = json_decode(file_get_contents($tempReport), true);
@@ -69,6 +72,12 @@ foreach ($allDirs as $dir) {
 
 // Save combined report
 file_put_contents($reportPath, json_encode($combinedResults, JSON_PRETTY_PRINT));
+
+// Save timing (analysis only)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing['symfony']['cognitive'] = round($totalTime, 1);
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 // Calculate summary
 $totalMethods = 0;

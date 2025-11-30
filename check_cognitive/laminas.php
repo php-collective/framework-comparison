@@ -27,6 +27,7 @@ if (!file_exists($ccaBin)) {
 }
 
 $combinedResults = [];
+$totalTime = 0;
 
 foreach ($packages as $name) {
     $srcDir = "$laminasDir/$name/src";
@@ -35,7 +36,9 @@ foreach ($packages as $name) {
     }
 
     $tempReport = "/tmp/cognitive_laminas_$name.json";
+    $pkgStart = microtime(true);
     exec("$ccaBin analyse " . escapeshellarg($srcDir) . " --report-type=json --report-file=$tempReport 2>/dev/null");
+    $totalTime += microtime(true) - $pkgStart;
 
     if (file_exists($tempReport)) {
         $json = json_decode(file_get_contents($tempReport), true);
@@ -49,6 +52,12 @@ foreach ($packages as $name) {
 }
 
 file_put_contents($reportPath, json_encode($combinedResults, JSON_PRETTY_PRINT));
+
+// Save timing (analysis only)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing['laminas']['cognitive'] = round($totalTime, 1);
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 // Calculate summary
 $totalMethods = 0;

@@ -83,10 +83,19 @@ if (!$phplocBin) {
 
 $analyzePath = "$repoPath/$srcDir";
 
-// Run phploc
+// Run phploc (timed)
 echo "Running phploc on $srcDir...\n";
 $phplocCommand = "$phplocBin --log-json=$reportPath $analyzePath 2>&1";
+
+$startTime = microtime(true);
 exec($phplocCommand, $phplocOutput, $phplocStatus);
+$elapsed = round(microtime(true) - $startTime, 1);
+
+// Save timing (analysis only, not setup)
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing[$repoName]['phploc'] = $elapsed;
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 // Read and display summary
 if (file_exists($reportPath)) {

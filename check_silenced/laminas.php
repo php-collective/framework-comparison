@@ -19,6 +19,8 @@ if (!is_dir($dataDir)) {
 
 echo "=== Silenced: Laminas (multi-package) ===\n";
 
+$startTime = microtime(true);
+
 $result = [
     'phpstan_ignore' => 0,
     'psalm_suppress' => 0,
@@ -54,6 +56,14 @@ foreach ($packages as $pkg) {
         $result['psalm_baseline'] += preg_match_all('/<code>/', $content);
     }
 }
+
+$elapsed = round(microtime(true) - $startTime, 1);
+
+// Save timing
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing['laminas']['silenced'] = $elapsed;
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 // Save to JSON
 $outputFile = "$dataDir/silenced_laminas.json";

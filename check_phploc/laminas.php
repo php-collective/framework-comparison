@@ -38,10 +38,19 @@ foreach ($packages as $name) {
     }
 }
 
-// Run phploc on all directories at once
+// Run phploc on all directories at once (timed)
 $tempReport = "/tmp/phploc_laminas.json";
 $dirs = implode(' ', array_map('escapeshellarg', $srcDirs));
+
+$startTime = microtime(true);
 exec("$phplocBin --log-json=$tempReport $dirs 2>&1");
+$elapsed = round(microtime(true) - $startTime, 1);
+
+// Save timing
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+$timing['laminas']['phploc'] = $elapsed;
+file_put_contents($timingFile, json_encode($timing, JSON_PRETTY_PRINT) . "\n");
 
 if (file_exists($tempReport)) {
     copy($tempReport, $reportPath);
