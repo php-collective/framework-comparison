@@ -23,6 +23,4 @@ See `reports/` files.
 
 
 ### TODOs
-- finish above
-- add silenced issues in the code (inline annotations) as 1 error each
 - visible results as table or graph

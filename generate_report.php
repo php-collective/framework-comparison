@@ -26,6 +26,7 @@ foreach ($frameworks as $fw) {
         'psalm' => null,
         'phploc' => null,
         'cognitive' => null,
+        'silenced' => null,
     ];
 
     // PHPStan
@@ -76,6 +77,12 @@ foreach ($frameworks as $fw) {
                 'max' => $maxScore,
             ];
         }
+    }
+
+    // Silenced issues
+    $silencedFile = "$reportsDir/silenced_$fw.json";
+    if (file_exists($silencedFile)) {
+        $data[$fw]['silenced'] = json_decode(file_get_contents($silencedFile), true);
     }
 }
 
@@ -136,6 +143,29 @@ foreach ($frameworks as $fw) {
     }
 }
 
+// Silenced Issues table
+$md .= "\n## Silenced Issues (Inline Annotations & Baselines)\n\n";
+$md .= "| Framework | @phpstan-ignore | @psalm-suppress | phpcs:ignore | @codeCoverageIgnore | PHPStan Baseline | Psalm Baseline |\n";
+$md .= "|-----------|-----------------|-----------------|--------------|---------------------|------------------|----------------|\n";
+
+foreach ($frameworks as $fw) {
+    $s = $data[$fw]['silenced'];
+    if ($s) {
+        $md .= sprintf(
+            "| %s | %d | %d | %d | %d | %d | %d |\n",
+            $displayNames[$fw],
+            $s['phpstan_ignore'] ?? 0,
+            $s['psalm_suppress'] ?? 0,
+            $s['phpcs_ignore'] ?? 0,
+            $s['coverage_ignore'] ?? 0,
+            $s['phpstan_baseline'] ?? 0,
+            $s['psalm_baseline'] ?? 0
+        );
+    } else {
+        $md .= "| " . $displayNames[$fw] . " | - | - | - | - | - | - |\n";
+    }
+}
+
 $md .= "\n## Frameworks Analyzed\n\n";
 $md .= "| Framework | First Release | GitHub |\n";
 $md .= "|-----------|---------------|--------|\n";
@@ -148,6 +178,7 @@ $md .= "| Yii2 | 2008 | [yiisoft/yii2](https://github.com/yiisoft/yii2) |\n";
 
 $md .= "\n## Notes\n\n";
 $md .= "- PHPStan and Psalm run at their strictest levels\n";
+$md .= "- Silenced issues = errors hidden via inline annotations or baseline files\n";
 $md .= "- Lower error counts indicate better type safety and static analysis compliance\n";
 $md .= "- Symfony Psalm: crashes due to codebase complexity (marked as `-`)\n";
 $md .= "- LOC = Lines of Code, LLOC = Logical Lines of Code\n";
