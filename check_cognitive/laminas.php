@@ -10,15 +10,13 @@ $dataDir = $baseDir . '/reports/data';
 $laminasDir = "$reposDir/laminas";
 $reportPath = "$dataDir/cognitive_laminas.json";
 
+// Load config for package list
+$config = require "$baseDir/config.php";
+$packages = array_keys($config['laminas']['packages'] ?? []);
+
 if (!is_dir($dataDir)) {
     mkdir($dataDir, 0777, true);
 }
-
-$packages = [
-    'laminas-mvc', 'laminas-db', 'laminas-view', 'laminas-form',
-    'laminas-validator', 'laminas-router', 'laminas-servicemanager',
-    'laminas-eventmanager', 'laminas-http', 'laminas-session',
-];
 
 echo "=== Cognitive Analysis: Laminas (multi-package) ===\n";
 

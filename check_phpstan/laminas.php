@@ -10,23 +10,16 @@ $dataDir = $baseDir . '/reports/data';
 $laminasDir = "$reposDir/laminas";
 $reportPath = "$dataDir/phpstan_laminas.json";
 
+// Load config for package/branch info
+$config = require "$baseDir/config.php";
+$laminasConfig = $config['laminas']['packages'] ?? [];
+
 if (!is_dir($dataDir)) {
     mkdir($dataDir, 0777, true);
 }
 
 // Core Laminas packages for a fair comparison
-$packages = [
-    'laminas/laminas-mvc',
-    'laminas/laminas-db',
-    'laminas/laminas-view',
-    'laminas/laminas-form',
-    'laminas/laminas-validator',
-    'laminas/laminas-router',
-    'laminas/laminas-servicemanager',
-    'laminas/laminas-eventmanager',
-    'laminas/laminas-http',
-    'laminas/laminas-session',
-];
+$packages = array_keys($laminasConfig);
 
 echo "=== PHPStan: Laminas (multi-package) ===\n";
 
@@ -37,14 +30,24 @@ if (!is_dir($laminasDir)) {
 $totalErrors = 0;
 $allFiles = [];
 
-foreach ($packages as $package) {
-    $name = basename($package);
+foreach ($packages as $name) {
+    $pkgConfig = $laminasConfig[$name];
+    $package = $pkgConfig['repo'];
+    $branch = $pkgConfig['branch'] ?? null;
     $pkgDir = "$laminasDir/$name";
 
     // Clone if not exists
     if (!is_dir($pkgDir)) {
         echo "Cloning $package...\n";
-        exec("git clone --depth 1 https://github.com/$package.git $pkgDir 2>&1");
+        $branchArg = $branch ? " --branch $branch" : '';
+        exec("git clone --depth 1$branchArg https://github.com/$package.git $pkgDir 2>&1");
+    } elseif ($branch) {
+        // Repo exists - ensure correct branch is checked out
+        $currentBranch = trim(shell_exec("git -C $pkgDir rev-parse --abbrev-ref HEAD 2>/dev/null") ?: '');
+        if ($currentBranch !== $branch) {
+            exec("git -C $pkgDir fetch --depth 1 origin $branch 2>&1");
+            exec("git -C $pkgDir checkout $branch 2>&1");
+        }
     }
 
     if (!is_dir($pkgDir)) {

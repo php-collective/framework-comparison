@@ -38,6 +38,24 @@ php check_silenced/run_all.php
 php generate_report.php
 ```
 
+## Configuration
+
+Framework settings are defined in `config.php`:
+
+```php
+'laravel' => [
+    'repo' => 'laravel/framework',
+    'branch' => '11.x',  // null = default branch
+    'srcDir' => 'src',
+],
+```
+
+- **branch**: Set to analyze a specific branch (e.g., `11.x` for stable vs `master` for dev)
+- **srcDir**: Directory containing source code to analyze
+- Laminas packages each have their own branch setting
+
+To switch between dev/stable branches, edit `config.php` and delete the `repos/` directory to re-clone.
+
 ## Results
 
 See [reports/README.md](reports/README.md) for the latest comparison table.

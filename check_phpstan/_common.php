@@ -7,11 +7,18 @@
  * - $framework: GitHub repo path (e.g., 'cakephp/cakephp')
  * - $repoName: Short name for the framework
  * - $srcDir: Source directory to analyze
+ * - $branch: (optional) Branch to checkout
  */
 
 $baseDir = dirname(__DIR__);
 $reposDir = $baseDir . '/repos';
 $dataDir = $baseDir . '/reports/data';
+
+// Load config for branch info if not explicitly set
+if (!isset($branch)) {
+    $config = require "$baseDir/config.php";
+    $branch = $config[$repoName]['branch'] ?? null;
+}
 
 if (!is_dir($reposDir)) {
     mkdir($reposDir, 0777, true);
@@ -29,12 +36,21 @@ echo "=== PHPStan: $framework ===\n";
 // Clone the repository if not exists
 if (!is_dir($repoPath)) {
     echo "Cloning $framework...\n";
-    $cloneCommand = "git clone --depth 1 https://github.com/$framework.git $repoPath";
+    $branchArg = $branch ? " --branch $branch" : '';
+    $cloneCommand = "git clone --depth 1$branchArg https://github.com/$framework.git $repoPath";
     exec($cloneCommand, $cloneOutput, $cloneStatus);
 
     if ($cloneStatus !== 0) {
         echo "Error: Failed to clone $framework.\n";
         exit(1);
+    }
+} elseif ($branch) {
+    // Repo exists - ensure correct branch is checked out
+    $currentBranch = trim(shell_exec("git -C $repoPath rev-parse --abbrev-ref HEAD 2>/dev/null") ?: '');
+    if ($currentBranch !== $branch) {
+        echo "Switching to branch $branch...\n";
+        exec("git -C $repoPath fetch --depth 1 origin $branch 2>&1");
+        exec("git -C $repoPath checkout $branch 2>&1");
     }
 }
 
