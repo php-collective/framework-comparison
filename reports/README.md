@@ -1,17 +1,6 @@
 # PHP Framework Comparison Results
 
-Generated: 2025-11-30 13:20:45
-
-## Static Analysis Errors
-
-| Framework | PHPStan (Level 8) | Psalm |
-|-----------|-------------------|-------|
-| CakePHP | 16 | 3095 |
-| CodeIgniter | 2354 | 104 |
-| Laminas | 3135 | 6188 |
-| Laravel | 11782 | 8287 |
-| Symfony | 2 | 53010 |
-| Yii2 | 4494 | 3229 |
+Generated: 2025-11-30 13:29:53
 
 ## Code Metrics (phploc)
 
@@ -34,6 +23,17 @@ Generated: 2025-11-30 13:20:45
 | Laravel | 11,902 | 0.08 | 7.233 |
 | Symfony | 42,007 | 0.19 | 14.617 |
 | Yii2 | 3,313 | 0.48 | 8.225 |
+
+## Static Analysis Errors
+
+| Framework | PHPStan | /1K LOC | Psalm | /1K LOC |
+|-----------|---------|---------|-------|---------|
+| CakePHP | 16 | 0.11 | 3095 | 20.88 |
+| CodeIgniter | 2354 | 20.03 | 104 | 0.88 |
+| Laminas | 3135 | 30.92 | 6188 | 61.04 |
+| Laravel | 11782 | 48.62 | 8287 | 34.19 |
+| Symfony | 2 | 0 | 53010 | 28.32 |
+| Yii2 | 4494 | 38.5 | 3229 | 27.66 |
 
 ## Silenced Issues (Inline Annotations & Baselines)
 
@@ -59,7 +59,7 @@ Generated: 2025-11-30 13:20:45
 
 ## Notes
 
-- PHPStan and Psalm run at their strictest sensible levels
+- PHPStan and Psalm run at their strictest levels
 - Silenced issues = errors hidden via inline annotations or baseline files
 - Lower error counts indicate better type safety and static analysis compliance
 - Laminas: analyzed 10 core packages (mvc, db, view, form, validator, router, servicemanager, eventmanager, http, session)

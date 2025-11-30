@@ -159,19 +159,8 @@ foreach ($frameworks as $fw) {
 $md = "# PHP Framework Comparison Results\n\n";
 $md .= "Generated: " . date('Y-m-d H:i:s') . "\n\n";
 
-// Static Analysis table
-$md .= "## Static Analysis Errors\n\n";
-$md .= "| Framework | PHPStan (Level 8) | Psalm |\n";
-$md .= "|-----------|-------------------|-------|\n";
-
-foreach ($frameworks as $fw) {
-    $phpstan = $data[$fw]['phpstan'] ?? '-';
-    $psalm = $data[$fw]['psalm'] ?? '-';
-    $md .= "| " . $displayNames[$fw] . " | $phpstan | $psalm |\n";
-}
-
 // Code metrics table
-$md .= "\n## Code Metrics (phploc)\n\n";
+$md .= "## Code Metrics (phploc)\n\n";
 $md .= "| Framework | LOC | Classes | Methods | Avg Method Length | Complexity/LLOC |\n";
 $md .= "|-----------|-----|---------|---------|-------------------|----------------|\n";
 
@@ -210,6 +199,29 @@ foreach ($frameworks as $fw) {
     } else {
         $md .= "| " . $displayNames[$fw] . " | - | - | - |\n";
     }
+}
+
+// Static Analysis table
+$md .= "\n## Static Analysis Errors\n\n";
+$md .= "| Framework | PHPStan | /1K LOC | Psalm | /1K LOC |\n";
+$md .= "|-----------|---------|---------|-------|---------|\n";
+
+foreach ($frameworks as $fw) {
+    $loc = $data[$fw]['phploc']['loc'] ?? null;
+    $phpstan = $data[$fw]['phpstan'];
+    $psalm = $data[$fw]['psalm'];
+
+    $phpstanPer1k = ($phpstan !== null && $loc) ? round($phpstan / $loc * 1000, 2) : null;
+    $psalmPer1k = ($psalm !== null && $loc) ? round($psalm / $loc * 1000, 2) : null;
+
+    $md .= sprintf(
+        "| %s | %s | %s | %s | %s |\n",
+        $displayNames[$fw],
+        fmt($phpstan),
+        fmt($phpstanPer1k),
+        fmt($psalm),
+        fmt($psalmPer1k)
+    );
 }
 
 // Silenced Issues table
