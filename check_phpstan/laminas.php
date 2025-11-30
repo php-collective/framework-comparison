@@ -43,6 +43,10 @@ foreach ($packages as $name) {
         $needsClone = true;
     } elseif ($branch) {
         $currentBranch = trim(shell_exec("git -C $pkgDir rev-parse --abbrev-ref HEAD 2>/dev/null") ?: '');
+        // For tags, rev-parse returns "HEAD", so also check describe --tags
+        if ($currentBranch === 'HEAD') {
+            $currentBranch = trim(shell_exec("git -C $pkgDir describe --tags --exact-match HEAD 2>/dev/null") ?: 'HEAD');
+        }
         if ($currentBranch !== $branch) {
             echo "  Branch mismatch for $name: have '$currentBranch', need '$branch'. Re-cloning...\n";
             exec("rm -rf " . escapeshellarg($pkgDir));
