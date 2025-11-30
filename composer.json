@@ -1,0 +1,5 @@
+{
+    "require": {
+        "phauthentic/cognitive-code-analysis": "^1.10"
+    }
+}
