@@ -37,6 +37,71 @@ function fmt($value, bool $format = false, int $decimals = 0): string
 }
 
 /**
+ * Format seconds as human-readable time (e.g., "2m 30s" or "1h 15m").
+ */
+function formatTime(float $seconds): string
+{
+    if ($seconds < 60) {
+        return round($seconds) . 's';
+    }
+    if ($seconds < 3600) {
+        $m = floor($seconds / 60);
+        $s = round($seconds % 60);
+        return $s > 0 ? "{$m}m {$s}s" : "{$m}m";
+    }
+    $h = floor($seconds / 3600);
+    $m = round(($seconds % 3600) / 60);
+    return $m > 0 ? "{$h}h {$m}m" : "{$h}h";
+}
+
+/**
+ * Get PHP version requirement from composer.json.
+ */
+function getPhpRequirement(string $reposDir, string $fw): string
+{
+    $composerFile = "$reposDir/$fw/composer.json";
+    if (!file_exists($composerFile)) {
+        return '-';
+    }
+
+    $composer = json_decode(file_get_contents($composerFile), true);
+    $php = $composer['require']['php'] ?? null;
+
+    if (!$php) {
+        return '-';
+    }
+
+    // Simplify common patterns
+    $php = str_replace(' ', '', $php);
+
+    // Multiple versions (||) -> extract minimum + "+"
+    if (strpos($php, '||') !== false || strpos($php, '|') !== false) {
+        if (preg_match('/^[~^]?(\d+\.\d+)/', $php, $m)) {
+            return "`{$m[1]}+`";
+        }
+    }
+
+    // ^X.Y means >=X.Y <(X+1).0, so show as X.Y+
+    if (preg_match('/^\^(\d+\.\d+)/', $php, $m)) {
+        return "`{$m[1]}+`";
+    }
+
+    // >=X.Y - keep as is
+    if (preg_match('/^>=(\d+\.\d+)/', $php, $m)) {
+        return "`>={$m[1]}`";
+    }
+
+    // ~X.Y means >=X.Y <X.(Y+1), so show as X.Y+
+    if (preg_match('/^~(\d+\.\d+)/', $php, $m)) {
+        return "`{$m[1]}+`";
+    }
+
+    // Fallback: clean up and fence
+    $php = preg_replace('/[~^]/', '', $php);
+    return "`$php`";
+}
+
+/**
  * Detect framework version from source files.
  */
 function getFrameworkVersion(string $reposDir, string $fw): string
@@ -247,9 +312,13 @@ foreach ($frameworks as $fw) {
     }
 }
 
+// Load timing data
+$timingFile = "$dataDir/timing.json";
+$timing = file_exists($timingFile) ? json_decode(file_get_contents($timingFile), true) : [];
+
 $md .= "\n## Frameworks Analyzed\n\n";
-$md .= "| Framework | Version | First Release | GitHub |\n";
-$md .= "|-----------|---------|---------------|--------|\n";
+$md .= "| Framework | Version | PHP | Analysis Time | First Release | GitHub |\n";
+$md .= "|-----------|---------|-----|---------------|---------------|--------|\n";
 
 $frameworkMeta = [
     'cakephp' => ['year' => 2005, 'repo' => 'cakephp/cakephp'],
@@ -262,11 +331,20 @@ $frameworkMeta = [
 
 foreach ($frameworks as $fw) {
     $version = getFrameworkVersion($reposDir, $fw);
+    $phpReq = getPhpRequirement($reposDir, $fw);
     $meta = $frameworkMeta[$fw];
+
+    // Calculate total analysis time
+    $fwTiming = $timing[$fw] ?? [];
+    $totalTime = array_sum($fwTiming);
+    $timeStr = $totalTime > 0 ? formatTime($totalTime) : '-';
+
     $md .= sprintf(
-        "| %s | %s | %d | [%s](https://github.com/%s) |\n",
+        "| %s | %s | %s | %s | %d | [%s](https://github.com/%s) |\n",
         $displayNames[$fw],
         $version,
+        $phpReq,
+        $timeStr,
         $meta['year'],
         $meta['repo'],
         $meta['repo']
@@ -278,7 +356,7 @@ $md .= "- PHPStan and Psalm run at their strictest levels\n";
 $md .= "- Silenced issues = errors hidden via inline annotations or baseline files\n";
 $md .= "- Lower error counts indicate better type safety and static analysis compliance\n";
 $md .= "- Laminas: analyzed 10 core packages (mvc, db, view, form, validator, router, servicemanager, eventmanager, http, session)\n";
-$md .= "- Symfony Psalm: analyzed per-component using root autoloader (1 component failed)\n";
+$md .= "- Symfony: analyzed per-component using root autoloader (Psalm: 67 components, Cognitive: 66/67)\n";
 $md .= "- LOC = Lines of Code, LLOC = Logical Lines of Code\n";
 $md .= "- Complexity/LLOC = Cyclomatic complexity per logical line of code\n";
 

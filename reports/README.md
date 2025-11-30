@@ -1,6 +1,6 @@
 # PHP Framework Comparison Results
 
-Generated: 2025-11-30 13:29:53
+Generated: 2025-11-30 13:55:33
 
 ## Code Metrics (phploc)
 
@@ -32,7 +32,7 @@ Generated: 2025-11-30 13:29:53
 | CodeIgniter | 2354 | 20.03 | 104 | 0.88 |
 | Laminas | 3135 | 30.92 | 6188 | 61.04 |
 | Laravel | 11782 | 48.62 | 8287 | 34.19 |
-| Symfony | 2 | 0 | 53010 | 28.32 |
+| Symfony | 2 | 0 | 53934 | 28.82 |
 | Yii2 | 4494 | 38.5 | 3229 | 27.66 |
 
 ## Silenced Issues (Inline Annotations & Baselines)
@@ -48,14 +48,14 @@ Generated: 2025-11-30 13:29:53
 
 ## Frameworks Analyzed
 
-| Framework | Version | First Release | GitHub |
-|-----------|---------|---------------|--------|
-| CakePHP | 5.2.9 | 2005 | [cakephp/cakephp](https://github.com/cakephp/cakephp) |
-| CodeIgniter | 4.6.3 | 2006 | [codeigniter4/CodeIgniter4](https://github.com/codeigniter4/CodeIgniter4) |
-| Laminas | 3.9.x | 2006 | [laminas/laminas-mvc](https://github.com/laminas/laminas-mvc) |
-| Laravel | 12.40.2 | 2011 | [laravel/framework](https://github.com/laravel/framework) |
-| Symfony | 8.1.0-DEV | 2005 | [symfony/symfony](https://github.com/symfony/symfony) |
-| Yii2 | 2.0.55-dev | 2008 | [yiisoft/yii2](https://github.com/yiisoft/yii2) |
+| Framework | Version | PHP | Analysis Time | First Release | GitHub |
+|-----------|---------|-----|---------------|---------------|--------|
+| CakePHP | 5.2.9 | `>=8.1` | 35s | 2005 | [cakephp/cakephp](https://github.com/cakephp/cakephp) |
+| CodeIgniter | 4.6.3 | `8.1+` | 29s | 2006 | [codeigniter4/CodeIgniter4](https://github.com/codeigniter4/CodeIgniter4) |
+| Laminas | 3.9.x | `8.1+` | 1m 26s | 2006 | [laminas/laminas-mvc](https://github.com/laminas/laminas-mvc) |
+| Laravel | 12.40.2 | `8.2+` | 1m 18s | 2011 | [laravel/framework](https://github.com/laravel/framework) |
+| Symfony | 8.1.0-DEV | `>=8.4` | 8m 40s | 2005 | [symfony/symfony](https://github.com/symfony/symfony) |
+| Yii2 | 2.0.55-dev | `>=7.4` | 29s | 2008 | [yiisoft/yii2](https://github.com/yiisoft/yii2) |
 
 ## Notes
 
@@ -63,6 +63,6 @@ Generated: 2025-11-30 13:29:53
 - Silenced issues = errors hidden via inline annotations or baseline files
 - Lower error counts indicate better type safety and static analysis compliance
 - Laminas: analyzed 10 core packages (mvc, db, view, form, validator, router, servicemanager, eventmanager, http, session)
-- Symfony Psalm: analyzed per-component using root autoloader (1 component failed)
+- Symfony: analyzed per-component using root autoloader (Psalm: 67 components, Cognitive: 66/67)
 - LOC = Lines of Code, LLOC = Logical Lines of Code
 - Complexity/LLOC = Cyclomatic complexity per logical line of code

@@ -44,6 +44,29 @@ See [reports/README.md](reports/README.md) for the latest comparison table.
 
 Note: The results are not interpreted here, only displayed as raw data so far.
 
+## Out of Scope
+
+This comparison focuses solely on static code analysis metrics. The following are explicitly **not** covered:
+
+- **Performance benchmarks** - Runtime speed, memory usage, request throughput
+- **Feature comparisons** - ORM capabilities, routing, templating, etc.
+- **Security audits** - Vulnerability assessments, CVE history
+- **Documentation quality** - Completeness, clarity, examples
+- **Community & ecosystem** - Package availability, job market, support
+- **Learning curve** - Ease of onboarding, developer experience
+- **Test coverage** - Unit/integration test percentages
+- **API stability** - Breaking changes between versions
+
 ## TODOs
 
 - visible results as table or graph
+
+Other ideas:
+
+| Category       | Idea                                                              |
+|----------------|-------------------------------------------------------------------|
+| More metrics   | Test coverage %, dependency count                                 |
+| Normalization  | Errors per class, errors per method                               |
+| Breakdown      | PHPStan/Psalm errors by category (type safety, unused code, etc.) |
+| Automation     | GitHub Actions to re-run monthly                                  |
+| Trend tracking | Store historical data to show improvement over versions           |
