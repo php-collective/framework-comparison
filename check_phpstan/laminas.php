@@ -37,18 +37,23 @@ foreach ($packages as $name) {
     $branch = $pkgConfig['branch'] ?? null;
     $pkgDir = "$laminasDir/$name";
 
-    // Clone if not exists
+    // Clone if not exists, or re-clone if branch changed
+    $needsClone = false;
     if (!is_dir($pkgDir)) {
-        echo "Cloning $package...\n";
-        $branchArg = $branch ? " --branch $branch" : '';
-        exec("git clone --depth 1$branchArg https://github.com/$package.git $pkgDir 2>&1");
+        $needsClone = true;
     } elseif ($branch) {
-        // Repo exists - ensure correct branch is checked out
         $currentBranch = trim(shell_exec("git -C $pkgDir rev-parse --abbrev-ref HEAD 2>/dev/null") ?: '');
         if ($currentBranch !== $branch) {
-            exec("git -C $pkgDir fetch --depth 1 origin $branch 2>&1");
-            exec("git -C $pkgDir checkout $branch 2>&1");
+            echo "  Branch mismatch for $name: have '$currentBranch', need '$branch'. Re-cloning...\n";
+            exec("rm -rf " . escapeshellarg($pkgDir));
+            $needsClone = true;
         }
+    }
+
+    if ($needsClone) {
+        echo "Cloning $package" . ($branch ? " (branch: $branch)" : "") . "...\n";
+        $branchArg = $branch ? " --branch $branch" : '';
+        exec("git clone --depth 1$branchArg https://github.com/$package.git $pkgDir 2>&1");
     }
 
     if (!is_dir($pkgDir)) {

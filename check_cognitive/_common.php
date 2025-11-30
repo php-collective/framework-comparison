@@ -33,9 +33,22 @@ $reportPath = "$dataDir/cognitive_$repoName.json";
 
 echo "=== Cognitive Analysis: $framework ===\n";
 
-// Clone the repository if not exists
+// Clone the repository if not exists, or re-clone if branch changed
+$needsClone = false;
 if (!is_dir($repoPath)) {
-    echo "Cloning $framework...\n";
+    $needsClone = true;
+} elseif ($branch) {
+    // Check if current branch matches desired branch
+    $currentBranch = trim(shell_exec("git -C $repoPath rev-parse --abbrev-ref HEAD 2>/dev/null") ?: '');
+    if ($currentBranch !== $branch) {
+        echo "Branch mismatch: have '$currentBranch', need '$branch'. Re-cloning...\n";
+        exec("rm -rf " . escapeshellarg($repoPath));
+        $needsClone = true;
+    }
+}
+
+if ($needsClone) {
+    echo "Cloning $framework" . ($branch ? " (branch: $branch)" : "") . "...\n";
     $branchArg = $branch ? " --branch $branch" : '';
     $cloneCommand = "git clone --depth 1$branchArg https://github.com/$framework.git $repoPath";
     exec($cloneCommand, $cloneOutput, $cloneStatus);
@@ -43,14 +56,6 @@ if (!is_dir($repoPath)) {
     if ($cloneStatus !== 0) {
         echo "Error: Failed to clone $framework.\n";
         exit(1);
-    }
-} elseif ($branch) {
-    // Repo exists - ensure correct branch is checked out
-    $currentBranch = trim(shell_exec("git -C $repoPath rev-parse --abbrev-ref HEAD 2>/dev/null") ?: '');
-    if ($currentBranch !== $branch) {
-        echo "Switching to branch $branch...\n";
-        exec("git -C $repoPath fetch --depth 1 origin $branch 2>&1");
-        exec("git -C $repoPath checkout $branch 2>&1");
     }
 }
 
