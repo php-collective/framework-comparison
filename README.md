@@ -78,7 +78,7 @@ To switch between dev/stable branches, edit `config.php` and delete the `repos/`
 
 ## Results
 
-See [reports/README.md](reports/README.md) for the latest comparison table.
+See **[reports/README.md](reports/README.md)** for the latest comparison table.
 
 Note: The results are not interpreted here, only displayed as raw data so far.
 
