@@ -21,6 +21,26 @@ Compare static analysis and code quality metrics of popular PHP frameworks.
 | Cognitive Complexity | Method complexity analysis |
 | Silenced Issues | Inline suppressions and baseline entries |
 
+## Requirements
+
+- PHP 8.1+
+- Composer
+- Git
+
+## Getting Started
+
+```bash
+# Clone the repo
+git clone https://github.com/php-collective/framework-comparison.git
+cd framework-comparison
+
+# Install dependencies
+composer install
+
+# Run all checks (first run clones frameworks - takes a while)
+php run_all.php
+```
+
 ## Usage
 
 ```bash
